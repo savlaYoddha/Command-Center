@@ -10,6 +10,11 @@
     "build": "npm run build --prefix frontend && npm run build --prefix backend",
     "start": "npm run start --prefix backend",
     "db:generate": "npm run db:generate --prefix backend",
-    "db:migrate": "npm run db:migrate --prefix backend"
+    "db:migrate": "npm run db:migrate --prefix backend",
+    "cc": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/cc.ps1",
+    "deploy:preprod": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/cc.ps1 preprod",
+    "deploy:prod": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/cc.ps1 prod",
+    "cc:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/cc.ps1 status",
+    "cc:rollback": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/cc.ps1 rollback"
   }
 }

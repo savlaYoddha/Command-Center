@@ -97,31 +97,29 @@ cd backend
 npm run db:generate   # drizzle-kit, when schema changes
 ```
 
-## Docker deployment
+## Docker deployment (3 environments)
 
-```bash
-cp .env.example .env
-# set secrets and INITIAL_ADMIN_PASSWORD
-docker compose up -d --build
-```
+Deployment is managed by OpenCode agents following `AGENTS.md`. The uniform
+interface is `scripts/cc.ps1` from Windows / `scripts/cc.sh` on the server
+(also mirrored as npm scripts: `deploy:preprod`, `deploy:prod`, `cc:status`, `cc:rollback`).
 
-The app listens on **port 3000**.
+| Env | Where | Host port | Domain |
+| --- | --- | --- | --- |
+| LOCAL | Windows laptop | DB `5433`, dev `:3000`/`:5173` | — |
+| PRE-PROD | server | **8080** | https://staging.commandcenter.savlayoddha.in |
+| PROD | server | **8081** | https://commandcenter.savlayoddha.in |
 
-Persistent volume:
+- CasaOS owns host port 80. Cloudflare Tunnel maps the domains to `127.0.0.1:8080`
+  (staging) and `127.0.0.1:8081` (prod). Never change these ports.
+- Local dev (hot reload): `.\scripts\cc.ps1 local up` then `npm run dev`.
+- Deploy PRE-PROD: `.\scripts\cc.ps1 preprod` (idempotent, safe to repeat).
+- Deploy PROD: `.\scripts\cc.ps1 prod` — never automatic, hard confirmation required.
+- Status / health: `.\scripts\cc.ps1 status <preprod|prod>`.
+- Rollback: `.\scripts\cc.ps1 rollback <preprod|prod>` (never removes volumes/database).
 
-```
-./data:/app/data
-```
-
-`docker compose down` does **not** delete `./data`. Recreating the container keeps the database and uploads.
-
-Health check: `GET /api/v1/health`
-
-```json
-{ "status": "ok" }
-```
-
-Put Cloudflare Tunnel / Tailscale / reverse proxy in front of port 3000. Set `COOKIE_SECURE=true` and `APP_ORIGIN=https://everything.savlayoddha.in` when serving HTTPS.
+Production volumes (`cc-prod-*`) are never removed. `docker compose down -v` and volume
+deletion against production are forbidden. PRE-PROD and PROD use fully separate
+containers, volumes, secrets, and networks. See `AGENTS.md` for the complete runbook.
 
 ## Backup
 

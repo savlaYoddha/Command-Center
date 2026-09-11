@@ -1,0 +1,51 @@
+# ─────────────────────────────────────────────
+# COMMANDCENTER — line-ending normalization
+# Store text as LF in the repository on every platform.
+# ─────────────────────────────────────────────
+
+* text=auto
+
+# Shell scripts must always be LF (the server runs Ubuntu; CRLF
+# breaks `bash script.sh` edge cases and pollutes tarball output).
+*.sh text eol=lf
+Dockerfile text eol=lf
+
+# Windows scripting stays CRLF on checkout.
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Config / markup / source: LF canonical.
+*.yml text eol=lf
+*.yaml text eol=lf
+*.env.example text eol=lf
+*.example text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.sql text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.gitkeep text
+*.lock text
+
+# Binary assets — never convert.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary

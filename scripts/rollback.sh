@@ -21,6 +21,27 @@ fi
 echo "==> COMMANDCENTER rollback: $ENV"
 require_env_file "$ENV"
 
+if [[ "$ENV" == "prod" ]]; then
+  echo ""
+  echo "⚠️  This rolls back PRODUCTION. Volumes and the database are NEVER touched —"
+  echo " it only switches the running app back to a previously built image."
+  if [[ -n "${CC_CONFIRM_RB:-}" ]]; then
+    if [[ "$CC_CONFIRM_RB" != "PROD-ROLLBACK" ]]; then
+      echo "Invalid CC_CONFIRM_RB." >&2
+      exit 1
+    fi
+  elif [[ -t 0 ]]; then
+    read -r -p "Type PROD-ROLLBACK to continue: " ANSWER
+    if [[ "$ANSWER" != "PROD-ROLLBACK" ]]; then
+      echo "Aborted — nothing changed." >&2
+      exit 1
+    fi
+  else
+    echo "Non-interactive: re-run with CC_CONFIRM_RB=PROD-ROLLBACK only after a human approves." >&2
+    exit 1
+  fi
+fi
+
 HIST="$(release_file "$ENV")"
 if [[ ! -s "$HIST" ]]; then
   echo "No release history for $ENV — nothing to roll back to." >&2
@@ -56,4 +77,4 @@ fi
 wait_healthy "$ENV"
 
 release_push "$ENV" "$(date +%Y%m%d-%H%M%S)" "$PREV_TAG" "$PREV_SHA" "rollback"
-echo "==> Done. $ENV rolled back to $PREV_TAG"
+echo "==> Done. $ENV rolled back to $PREV_TAG (volumes/database untouched)"

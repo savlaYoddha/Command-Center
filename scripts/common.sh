@@ -19,12 +19,26 @@ require_env_file() {
     echo "[common] Create it from $file.example and fill in real values." >&2
     exit 1
   fi
+}
+
+# Warn (but do not abort) about placeholder/empty secrets in an env file.
+require_env_file_warnings() {
+  local env="$1"
+  local file="$ROOT/deploy/$env/.env.$env"
   if grep -Eq '^[A-Za-z0-9_]+[[:space:]]*=[[:space:]]*$' "$file"; then
     echo "[common] Warning: some values are EMPTY in $file" >&2
   fi
   if grep -q 'change-me' "$file"; then
     echo "[common] Warning: $file still contains 'change-me' placeholder values" >&2
   fi
+}
+
+# Read one KEY=value line from an environment file (echoes value or nothing).
+env_value() {
+  local env="$1" key="$2"
+  local file="$ROOT/deploy/$env/.env.$env"
+  [[ -f "$file" ]] || return 0
+  grep -E "^${key}=" "$file" | tail -n 1 | cut -d= -f2-
 }
 
 # Fail unless ROOT is a git working copy with the app checked out.
@@ -36,10 +50,39 @@ require_git() {
   fi
 }
 
+# Refuse commands that would delete PROD data. Called by cc() for prod.
+guard_data_destructive() {
+  local env="$1"; shift
+  [[ "$env" != "prod" ]] && return 0
+  local arg prev="" vdown="no"
+  for arg in "$@"; do
+    case "$arg" in
+      down) vdown="yes" ;;
+      -v|--volumes)
+        if [[ "$vdown" == "yes" ]]; then
+          echo "[guard] BLOCKED: 'docker compose down -v/--volumes' would delete PRODUCTION volumes (cc-prod-*)." >&2
+          exit 1
+        fi
+        ;;
+      rm)
+        if [[ "$prev" == "volume" ]]; then
+          echo "[guard] BLOCKED: 'docker volume rm' is not allowed for PROD (cc-prod-* volumes hold real user data)." >&2
+          exit 1
+        fi
+        echo "[guard] BLOCKED: 'docker compose rm' is not allowed for PROD." >&2
+        exit 1
+        ;;
+    esac
+    prev="$arg"
+  done
+  return 0
+}
+
 # Run docker compose for a given environment with its secrets file.
 # Shell env vars (e.g. CC_TAG) override the env-file during interpolation.
 cc() {
   local env="$1"; shift
+  guard_data_destructive "$env" "$@"
   docker compose \
     -f "$ROOT/deploy/$env/docker-compose.$env.yml" \
     --env-file "$ROOT/deploy/$env/.env.$env" \
@@ -64,10 +107,18 @@ release_previous() {
   head -n -1 "$f" | tail -n 1
 }
 
-# Host web port for an env (preprod 8080, prod 80).
+# Short SHA of the most recent recorded release for an env (empty if none).
+last_release_sha() {
+  local env="$1"
+  local f="$(release_file "$env")"
+  [[ -s "$f" ]] || return 0
+  tail -n 1 "$f" | awk '{print $3}'
+}
+
+# Host web port for an env (preprod 8080, prod 8081 — CasaOS owns 80).
 web_port() {
   local env="$1"
-  if [[ "$env" == "prod" ]]; then echo 80; else echo 8080; fi
+  if [[ "$env" == "prod" ]]; then echo 8081; else echo 8080; fi
 }
 
 # Poll the public health endpoint until it responds or times out.

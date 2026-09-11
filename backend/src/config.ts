@@ -3,8 +3,10 @@ import { fileURLToPath } from "node:url";
 import { config as loadEnv } from "dotenv";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const backendRoot = path.resolve(here, "..");
 const projectRoot = path.resolve(here, "../..");
 
+loadEnv({ path: path.join(backendRoot, ".env") });
 loadEnv({ path: path.join(projectRoot, ".env") });
 loadEnv();
 

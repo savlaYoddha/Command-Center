@@ -1,7 +1,11 @@
 # ─────────────────────────────────────────────────────────────
 # COMMANDCENTER — PRE-PROD (server, testing)
+# Domain:  https://staging.commandcenter.savlayoddha.in
+# Web on:  HOST PORT 8080 -> container 80
+#          (Cloudflare Tunnel routes staging.commandcenter.savlayoddha.in
+#           -> 127.0.0.1:8080)
 # Deployed manually via scripts/deploy-preprod.sh.
-# Web on host port 8080 · fully separate volumes from PROD.
+# Fully separate containers, volumes, secrets and network from PROD.
 #   docker compose -f deploy/preprod/docker-compose.preprod.yml \
 #     --env-file deploy/preprod/.env.preprod up -d --build
 # ─────────────────────────────────────────────────────────────

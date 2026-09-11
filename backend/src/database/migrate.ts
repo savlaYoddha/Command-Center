@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { getPool } from "./index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -99,4 +99,17 @@ export async function runMigrations(): Promise<void> {
   }
 
   console.log(`Migrations complete. ${count} applied, ${files.length - count} already applied.`);
+}
+
+function isMainModule(): boolean {
+  const entry = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";
+  return import.meta.url === entry;
+}
+
+if (isMainModule()) {
+  try {
+    await runMigrations();
+  } finally {
+    await getPool().end();
+  }
 }

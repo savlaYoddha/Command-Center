@@ -14,6 +14,7 @@ if [[ "$ENV" != "preprod" && "$ENV" != "prod" ]]; then
 fi
 
 echo "==> $ENV services"
+require_env_file "$ENV"
 cc "$ENV" ps
 
 echo ""

@@ -1,8 +1,13 @@
 # ─────────────────────────────────────────────────────────────
 # COMMANDCENTER — PROD (server, live user data)
-# Deployed manually via scripts/deploy-prod.sh AFTER approval.
-# Web on host port 80 · volumes are NEVER removed by any deploy.
-# Only use: up -d / up -d --build. NEVER `down -v`.
+# Domain:  https://commandcenter.savlayoddha.in
+# Web on:  HOST PORT 8081 -> container 80
+#          (CasaOS owns host port 80; Cloudflare Tunnel routes
+#           commandcenter.savlayoddha.in -> 127.0.0.1:8081)
+# Deployed manually via scripts/deploy-prod.sh AFTER explicit
+# human approval. Volumes/database are NEVER removed by any
+# deploy. Only use: up -d / up -d --build. NEVER `down -v`
+# against this project, NEVER delete cc-prod-* volumes.
 #   docker compose -f deploy/prod/docker-compose.prod.yml \
 #     --env-file deploy/prod/.env.prod up -d
 # ─────────────────────────────────────────────────────────────
@@ -66,7 +71,7 @@ services:
     container_name: commandcenter-prod-web
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "8081:80"
     depends_on:
       backend:
         condition: service_healthy
