@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Backend typecheck + build
+        working-directory: backend
+        run: |
+          npm ci
+          npm run typecheck
+          npm run build
+
+      - name: Frontend typecheck + build
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run typecheck
+          npm run build
+
+      - name: Validate compose configs
+        run: |
+          for env in preprod prod; do
+            docker compose -f deploy/$env/docker-compose.$env.yml \
+              --env-file deploy/$env/.env.$env.example config --quiet
+          done
+
+      - name: Shell syntax check
+        run: |
+          for f in scripts/*.sh; do
+            bash -n "$f"
+          done

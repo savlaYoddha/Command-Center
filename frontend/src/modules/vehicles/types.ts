@@ -1,0 +1,52 @@
+export type VehicleKind = "car" | "motorcycle" | "scooter" | "other";
+
+export type Vehicle = {
+  id: string;
+  name: string;
+  kind: VehicleKind;
+  make: string;
+  model: string;
+  variant: string;
+  year: number | null;
+  registrationNumber: string;
+  vin: string;
+  engineNumber: string;
+  fuelType: string;
+  transmission: string;
+  color: string;
+  loanId: string | null;
+  frontTyre: string;
+  rearTyre: string;
+  purchaseDate: string | null;
+  purchasePrice: number | null;
+  currentOdometer: number;
+  currentValue: number | null;
+  photo: string;
+  notes: string;
+  archived: number;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type VehicleInput = {
+  name: string;
+  kind?: VehicleKind;
+  make?: string;
+  model?: string;
+  variant?: string;
+  year?: number | null;
+  registrationNumber?: string;
+  vin?: string;
+  engineNumber?: string;
+  fuelType?: string;
+  transmission?: string;
+  color?: string;
+  loanId?: string | null;
+  frontTyre?: string;
+  rearTyre?: string;
+  purchaseDate?: string | null;
+  purchasePrice?: number | null;
+  currentOdometer?: number;
+  currentValue?: number | null;
+  notes?: string;
+};

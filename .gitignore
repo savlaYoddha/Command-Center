@@ -1,0 +1,26 @@
+node_modules/
+dist/
+build/
+.env
+*.log
+.DS_Store
+Thumbs.db
+data/database.sqlite
+data/database.sqlite-*
+data/uploads/**
+!data/uploads/.gitkeep
+!data/.gitkeep
+backups/
+*.sql
+!backend/src/database/migrations/*.sql
+frontend/dist
+backend/dist
+*.tsbuildinfo
+
+# ── Per-environment secrets (templates are kept, real files never committed) ──
+deploy/*/.env.*
+!deploy/*/.env.*.example
+# Release history written by deploy/rollback scripts on the server
+deploy/.releases/
+# Local test leftover
+server_test_pid.txt

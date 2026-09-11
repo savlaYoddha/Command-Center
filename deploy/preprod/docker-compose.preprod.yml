@@ -1,0 +1,82 @@
+# ─────────────────────────────────────────────────────────────
+# COMMANDCENTER — PRE-PROD (server, testing)
+# Deployed manually via scripts/deploy-preprod.sh.
+# Web on host port 8080 · fully separate volumes from PROD.
+#   docker compose -f deploy/preprod/docker-compose.preprod.yml \
+#     --env-file deploy/preprod/.env.preprod up -d --build
+# ─────────────────────────────────────────────────────────────
+
+name: commandcenter-preprod
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: commandcenter-preprod-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: commandcenter
+      POSTGRES_USER: commandcenter
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - cc-preprod-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U commandcenter -d commandcenter"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    image: commandcenter-preprod-backend:${CC_TAG:-latest}
+    container_name: commandcenter-preprod-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATA_DIR: /app/data
+      DATABASE_URL: postgresql://commandcenter:${POSTGRES_PASSWORD}@postgres:5432/commandcenter
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      INITIAL_ADMIN_USERNAME: ${INITIAL_ADMIN_USERNAME}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
+      APP_ORIGIN: ${APP_ORIGIN}
+      COOKIE_SECURE: ${COOKIE_SECURE}
+      COOKIE_SAMESITE: ${COOKIE_SAMESITE}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - cc-preprod-uploads:/app/data/uploads
+      - cc-preprod-backups:/app/backups
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+    image: commandcenter-preprod-frontend:${CC_TAG:-latest}
+    container_name: commandcenter-preprod-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1/api/v1/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  cc-preprod-pg-data:
+  cc-preprod-uploads:
+  cc-preprod-backups:

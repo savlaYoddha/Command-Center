@@ -1,0 +1,31 @@
+# ─────────────────────────────────────────────────────────────
+# COMMANDCENTER — LOCAL development database
+# Only PostgreSQL for local `npm run dev` (hot reload stays on
+# the host: backend `tsx watch` + frontend Vite).
+# Data lives in the `commandcenter-local_cc-local-pg-data` volume,
+# separate from preprod/prod.
+# ─────────────────────────────────────────────────────────────
+
+name: commandcenter-local
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: commandcenter-local-db
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: commandcenter_dev
+      POSTGRES_USER: commandcenter
+      POSTGRES_PASSWORD: commandcenter_dev_password
+    volumes:
+      - cc-local-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U commandcenter -d commandcenter_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  cc-local-pg-data:
