@@ -21,8 +21,7 @@ echo ""
 echo "==> images"
 cc "$ENV" images 2>/dev/null || true
 
-PORT="$(cc "$ENV" port frontend 80 2>/dev/null || true)"
-[[ -z "$PORT" ]] && PORT="$(web_port "$ENV")"
+PORT="$(host_port "$ENV")"
 
 echo ""
 echo "==> health (http://127.0.0.1:$PORT/api/v1/health)"

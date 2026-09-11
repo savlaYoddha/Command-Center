@@ -121,12 +121,19 @@ web_port() {
   if [[ "$env" == "prod" ]]; then echo 8081; else echo 8080; fi
 }
 
+# Host port the frontend container actually publishes (e.g. "8080").
+# Falls back to the static web_port when `compose port` can't tell yet.
+host_port() {
+  local env="$1" p
+  p="$(cc "$env" port frontend 80 2>/dev/null | sed -E 's/^.*:([0-9]+)$/\1/' | tail -n 1 || true)"
+  echo "${p:-$(web_port "$env")}"
+}
+
 # Poll the public health endpoint until it responds or times out.
 wait_healthy() {
   local env="$1" tries="${2:-60}"
-  local port=""
-  port="$(cc "$env" port frontend 80 2>/dev/null || true)"
-  [[ -z "$port" ]] && port="$(web_port "$env")"
+  local port
+  port="$(host_port "$env")"
   echo "[common] Waiting for health at http://127.0.0.1:$port/api/v1/health"
   local i
   for ((i = 1; i <= tries; i++)); do
