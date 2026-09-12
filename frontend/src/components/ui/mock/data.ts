@@ -45,7 +45,7 @@ export const mockTransactions: MockTransaction[] = [
 ];
 
 export const mockTasks: MockTask[] = [
-  { id: "t-1", number: "TASK-001", title: "Replace homelab UPS battery", priority: "high", status: "In Progress" },
+  { id: "t-1", number: "TASK-001", title: "Renew vehicle insurance", priority: "high", status: "In Progress" },
   { id: "t-2", number: "TASK-002", title: "Review finance export schema", priority: "medium", status: "Backlog" },
   { id: "t-3", number: "TASK-003", title: "Archive vehicle service receipts", priority: "low", status: "Done" },
 ];

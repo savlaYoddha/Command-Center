@@ -7,79 +7,9 @@ import { calculateEmi, emiDateFor, type Loan, type PaymentRecord } from "./loanE
 
 const STORAGE_KEY = "commandcenter.finance.loans.v1";
 
-// ── Seed: the two validation examples from the spec ─────────
+// ── Seed: start empty; fresh installs contain no demo finance data ──
 function seedLoans(): Loan[] {
-  const commonRules = {
-    preclosure: [
-      { fromMonth: 1, toMonth: 12, chargeType: "percentage" as const, chargeValue: 3, gstApplicable: false, notes: "Spec example" },
-      { fromMonth: 13, toMonth: 24, chargeType: "percentage" as const, chargeValue: 2, gstApplicable: false, notes: "Spec example" },
-      { fromMonth: 25, toMonth: 999, chargeType: "percentage" as const, chargeValue: 0, gstApplicable: false, notes: "Spec example" },
-    ],
-    partPayment: [
-      { fromMonth: 1, toMonth: 24, chargeType: "percentage" as const, chargeValue: 3, gstApplicable: false, notes: "Spec example" },
-      { fromMonth: 25, toMonth: 999, chargeType: "percentage" as const, chargeValue: 0, gstApplicable: false, notes: "Spec example" },
-    ],
-  };
-  const car1Emi = round(calculateEmi(10_00_000, 8.55, 60));
-  const car2Emi = round(calculateEmi(10_00_000, 8.75, 72));
-  return [
-    {
-      id: "loan-car-001",
-      loanId: "CAR-001",
-      name: "City Car Loan",
-      type: "Vehicle",
-      lender: "HDFC Bank",
-      account: "CAR-ACC-8841",
-      status: "active",
-      principal: 10_00_000,
-      disbursementAmount: 10_00_000,
-      disbursementDate: "2024-06-15",
-      firstEmiDate: "2024-07-15",
-      interestType: "reducing",
-      annualRate: 8.55,
-      tenureMonths: 60,
-      emi: car1Emi,
-      emiDueDay: 15,
-      processingFee: 10000,
-      documentationFee: 2000,
-      insuranceFinanced: 0,
-      otherFinanced: 0,
-      preclosureRules: commonRules.preclosure,
-      partPaymentRules: commonRules.partPayment,
-      payments: [],
-      notes: "Validation example — 8.55% reducing, 60 months.",
-      createdAt: "2024-06-10",
-      updatedAt: "2024-06-10",
-    },
-    {
-      id: "loan-car-002",
-      loanId: "CAR-002",
-      name: "SUV Loan",
-      type: "Vehicle",
-      lender: "ICICI Bank",
-      account: "CAR-ACC-9032",
-      status: "active",
-      principal: 10_00_000,
-      disbursementAmount: 10_00_000,
-      disbursementDate: "2024-08-01",
-      firstEmiDate: "2024-09-01",
-      interestType: "reducing",
-      annualRate: 8.75,
-      tenureMonths: 72,
-      emi: car2Emi,
-      emiDueDay: 1,
-      processingFee: 12000,
-      documentationFee: 2500,
-      insuranceFinanced: 0,
-      otherFinanced: 0,
-      preclosureRules: commonRules.preclosure,
-      partPaymentRules: commonRules.partPayment,
-      payments: [],
-      notes: "Validation example — 8.75% reducing, 72 months.",
-      createdAt: "2024-07-20",
-      updatedAt: "2024-07-20",
-    },
-  ];
+  return [];
 }
 
 function loadInitial(): Loan[] {

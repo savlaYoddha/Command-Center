@@ -14,7 +14,7 @@ export function DashboardPage() {
       </div>
       <CommandPanel className="p-6" hatch>
         <p className="text-sm text-text-secondary">
-          Detailed analytics will aggregate live data from Tasks, Finance, Vehicles, Documents and Homelab
+          Detailed analytics will aggregate live data from Tasks, Finance, Vehicles and Documents
           as those modules come online. Charts stay readable — no cockpit clutter.
         </p>
       </CommandPanel>

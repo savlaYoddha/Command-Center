@@ -15,3 +15,4 @@ export {
   savedFilters,
 } from "./tasks.js";
 export { vehicles } from "./vehicles.js";
+export { documents } from "./documents.js";

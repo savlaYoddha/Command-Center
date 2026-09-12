@@ -27,7 +27,6 @@ export async function getCommandOverview(userId: string) {
         secondaryLabel: "ARCHIVED",
       },
       documents: { primary: 0, primaryLabel: "DOCUMENTS", secondary: 0, secondaryLabel: "EXPIRING" },
-      homelab: { primary: 0, primaryLabel: "SERVICES", secondary: 0, secondaryLabel: "ONLINE" },
       dashboard: {
         primary: system.cpu,
         primaryLabel: "CPU",

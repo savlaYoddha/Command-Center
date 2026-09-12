@@ -44,7 +44,7 @@ export function CommandHomePage() {
 
   if (!overview) return <LoadingState label="LOADING COMMAND OVERVIEW..." />;
 
-  const tileOrder = ["tasks", "finance", "vehicles", "documents", "homelab", "dashboard"];
+  const tileOrder = ["tasks", "finance", "vehicles", "documents", "dashboard"];
   const tileModules = tileOrder
     .map((id) => modules.find((m) => m.id === id))
     .filter((m): m is (typeof modules)[number] => Boolean(m));

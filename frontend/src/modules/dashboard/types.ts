@@ -3,6 +3,5 @@ export type ModuleId =
   | "finance"
   | "vehicles"
   | "documents"
-  | "homelab"
   | "dashboard"
   | "settings";

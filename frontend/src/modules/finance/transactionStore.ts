@@ -25,12 +25,7 @@ export function todayStamp(): string {
 }
 
 function seedTransactions(): Transaction[] {
-  return [
-    { id: "1", date: "2026-09-02", reason: "Monthly grocery run", category: "Food", amount: 3240, type: "expense", paymentMethodId: "coral" },
-    { id: "2", date: "2026-09-01", reason: "Fuel refill", category: "Petrol", amount: 2800, type: "expense", paymentMethodId: "gpay" },
-    { id: "3", date: "2026-09-01", reason: "Salary credit", category: "Income", amount: 85000, type: "income", paymentMethodId: "savings" },
-    { id: "4", date: "2026-08-30", reason: "Movie night", category: "Entertainment", amount: 850, type: "expense", paymentMethodId: "coral" },
-  ];
+  return [];
 }
 
 function loadInitial(): Transaction[] {

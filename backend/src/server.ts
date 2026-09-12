@@ -20,6 +20,7 @@ import { tasksRouter } from "./modules/tasks/tasks.routes.js";
 import { backupRouter } from "./modules/tasks/backup.routes.js";
 import { apiKeysRouter } from "./modules/apikeys/apikeys.routes.js";
 import { vehiclesRouter } from "./modules/vehicles/vehicles.routes.js";
+import { documentsRouter } from "./modules/documents/documents.routes.js";
 import { openApiDocument } from "./openapi/document.js";
 import swaggerUi from "swagger-ui-express";
 import {
@@ -95,6 +96,7 @@ app.use("/api/v1/comments", commentsRouter);
 app.use("/api/v1/attachments", attachmentsRouter);
 app.use("/api/v1/saved-filters", savedFiltersRouter);
 app.use("/api/v1/vehicles", vehiclesRouter);
+app.use("/api/v1/documents", documentsRouter);
 
 app.use("/uploads", express.static(config.uploadsDir));
 

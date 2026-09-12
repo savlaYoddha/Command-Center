@@ -5,7 +5,6 @@ import {
   Landmark,
   Car,
   FileStack,
-  Server,
   Settings,
   Hexagon,
 } from "lucide-react";
@@ -73,15 +72,6 @@ export const modules: ModuleDefinition[] = [
     subtitle: "Archive and expiry",
     icon: FileStack,
     accent: "var(--accent-secondary)",
-    nav: true,
-  },
-  {
-    id: "homelab",
-    name: "HOMELAB",
-    path: "/homelab",
-    subtitle: "Infrastructure",
-    icon: Server,
-    accent: "var(--success)",
     nav: true,
   },
   {

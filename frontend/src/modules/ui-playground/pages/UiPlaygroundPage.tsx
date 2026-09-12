@@ -324,7 +324,7 @@ export function UiPlaygroundPage() {
         <Pagination page={page} pageSize={5} total={mockTransactions.length} onPageChange={setPage} />
       </PlaygroundSection>
 
-      <PlaygroundSection title="Timeline" purpose="Reusable activity timeline for tasks, finance, vehicles, documents, and homelab events.">
+      <PlaygroundSection title="Timeline" purpose="Reusable activity timeline for tasks, finance, vehicles, and documents events.">
         <TimelineCard title="Activity stream">
           <Timeline items={mockActivity} />
         </TimelineCard>

@@ -21,11 +21,7 @@ export type PaymentMethod = {
 const STORAGE_KEY = "commandcenter.finance.methods.v1";
 
 function seedMethods(): PaymentMethod[] {
-  return [
-    { id: "coral", name: "ICICI Coral CC", kind: "credit-card", detail: "•••• 1007", bank: "ICICI Bank", balance: 0, limit: 100000, dueDate: "12 Sep 2026", extra: "Expiry available in secure records" },
-    { id: "savings", name: "Everyday Savings", kind: "bank-account", detail: "•••• 1048", bank: "ICICI Bank", balance: 42850, extra: "IFSC ICIC0001048" },
-    { id: "gpay", name: "Google Pay UPI", kind: "upi", detail: "savlay@okicici", bank: "Linked to ICICI Savings", balance: 42850, extra: "Active on Google Pay" },
-  ];
+  return [];
 }
 
 function loadInitial(): PaymentMethod[] {

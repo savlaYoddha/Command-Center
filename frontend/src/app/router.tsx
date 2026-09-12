@@ -30,9 +30,6 @@ const VehicleDetailPage = lazy(() =>
 const DocumentsPage = lazy(() =>
   import("@/modules/documents/pages/DocumentsPage").then((m) => ({ default: m.DocumentsPage })),
 );
-const HomelabPage = lazy(() =>
-  import("@/modules/homelab/pages/HomelabPage").then((m) => ({ default: m.HomelabPage })),
-);
 const SettingsPage = lazy(() =>
   import("@/modules/settings/pages/SettingsPage").then((m) => ({ default: m.SettingsPage })),
 );
@@ -71,7 +68,6 @@ export function AppRouter() {
           <Route path="/vehicles" element={<VehiclesPage />} />
           <Route path="/vehicles/:vehicleId" element={<VehicleDetailPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
-          <Route path="/homelab" element={<HomelabPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/ui-playground" element={<UiPlaygroundPage />} />
         </Route>
