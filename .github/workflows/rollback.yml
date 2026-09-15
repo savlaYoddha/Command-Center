@@ -1,0 +1,58 @@
+# COMMANDCENTER — manual rollback via GitHub Actions
+#
+# Use: Actions -> Rollback -> Run workflow -> pick preprod or prod.
+# Reuses the existing scripts/rollback.sh — never touches containers,
+# volumes, or databases; it only switches the running image.
+# Prod rollback is gated by the "production" Environment (Required
+# reviewers) and uses CC_CONFIRM_RB=PROD-ROLLBACK after that approval.
+
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to roll back
+        required: true
+        type: choice
+        options:
+          - preprod
+          - prod
+
+concurrency:
+  group: cd-main
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    name: Rollback ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment == 'prod' && 'production' || 'preprod' }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Join Tailnet (runner must reach the server's Tailscale IP)
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Rollback via SSH (scripts/rollback.sh)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          command_timeout: 30m
+          script: |
+            set -euxo pipefail
+            cd ~/Command-Center
+            if [ "${{ inputs.environment }}" = "prod" ]; then
+              CC_CONFIRM_RB=PROD-ROLLBACK bash scripts/rollback.sh prod
+            else
+              bash scripts/rollback.sh preprod
+            fi
+            bash scripts/status.sh "${{ inputs.environment }}"

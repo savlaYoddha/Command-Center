@@ -1,0 +1,128 @@
+# COMMANDCENTER — CI/CD via GitHub Actions
+#
+# Triggers: push to main (and manual dispatch)
+#
+# Flow:
+#   1. validate  — typecheck + build backend & frontend (GitHub-hosted runner)
+#   2. deploy-preprod — auto: runner joins the Tailnet, SSHes to the Ubuntu
+#      server and runs the EXISTING scripts/deploy-preprod.sh
+#   3. deploy-prod — manual approval: GitHub Environment "production" with
+#      Required reviewers. After human approval, SSHes and runs
+#      CC_CONFIRM_PROD=PROD bash scripts/deploy-prod.sh
+#
+# All deployment logic lives in the existing server-side scripts
+# (deploy-preprod.sh / deploy-prod.sh / status.sh / rollback.sh). The
+# runner only reaches the server over Tailscale (100.95.32.99); it can
+# NOT reach that address otherwise. Real secrets live in
+# deploy/<env>/.env.<env> on the server only — never in this repo.
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: cd-main
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate & build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Backend typecheck & build
+        working-directory: backend
+        run: npm ci && npm run typecheck && npm run build
+
+      - name: Frontend build (includes typecheck)
+        working-directory: frontend
+        run: npm ci && npm run build
+
+  deploy-preprod:
+    name: Deploy PRE-PROD
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Join Tailnet (runner must reach the server's Tailscale IP)
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Deploy via SSH (scripts/deploy-preprod.sh)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          command_timeout: 30m
+          script: |
+            set -euxo pipefail
+            cd ~/Command-Center
+            bash scripts/deploy-preprod.sh
+
+      - name: Verify PRE-PROD (public)
+        run: |
+          curl -fsS https://staging-commandcenter.savlayoddha.in/api/v1/health
+          echo "PRE-PROD healthy"
+
+  deploy-prod:
+    name: Deploy PROD
+    runs-on: ubuntu-latest
+    needs: deploy-preprod
+    environment: production
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Approving this deploy
+        run: |
+          echo "Commit : ${{ github.sha }}"
+          echo "Release: main-$(git rev-parse --short "${{ github.sha }}")"
+          echo "Domain : https://commandcenter.savlayoddha.in"
+          echo "Stack  : commandcenter-prod-postgres / -api / -web"
+          echo "Warning: real PRODUCTION volumes (cc-prod-*) are in use; they are NEVER deleted."
+
+      - name: Join Tailnet (runner must reach the server's Tailscale IP)
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Deploy via SSH (scripts/deploy-prod.sh)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          command_timeout: 30m
+          script: |
+            set -euxo pipefail
+            cd ~/Command-Center
+            CC_CONFIRM_PROD=PROD bash scripts/deploy-prod.sh
+
+      - name: Verify PROD (public)
+        run: |
+          curl -fsS https://commandcenter.savlayoddha.in/api/v1/health
+          echo "PROD healthy"
